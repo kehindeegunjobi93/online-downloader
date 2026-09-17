@@ -32,9 +32,12 @@ COPY --from=build --chown=node:node /app/web/build /app/web-build
 # Startup script to run API backend and Web frontend simultaneously
 COPY --chown=node:node <<'EOF' /app/start.sh
 #!/bin/sh
-# Serve Web UI on PORT (default 7575 for Koyeb)
+# Set default API_URL for Cobalt processing engine if not defined
+export API_URL="${API_URL:-http://localhost:9000/}"
+
+# Serve Web UI on PORT
 echo "Starting Cobalt Web UI..."
-npx serve -s /app/web-build -l ${PORT:-7575} &
+npx serve -s /app/web-build -l ${PORT:-10000} &
 
 # Start API Backend on 9000
 echo "Starting Cobalt API Backend..."
