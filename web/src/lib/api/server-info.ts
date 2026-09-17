@@ -12,7 +12,7 @@ export type CobaltServerInfoCache = {
 }
 
 const request = async () => {
-    const apiEndpoint = `${currentApiURL()}/`;
+    const apiEndpoint = `${currentApiURL()}/api-info`;
 
     const response: CobaltServerInfoResponse = await fetch(apiEndpoint, {
         redirect: "manual",

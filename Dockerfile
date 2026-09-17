@@ -39,12 +39,21 @@ export API_URL="${API_URL:-http://localhost:${PORT}/}"
 # Write Caddyfile config
 cat <<CADDY_EOF > /app/Caddyfile
 :${PORT} {
-    # Route /tunnel and POST / directly to API backend on 9000
+    # Route /tunnel, /session, and API root GET/POST requests to API backend on 9000
     @api {
         path /tunnel* /session*
+    }
+    @apiPost {
         method POST
     }
     handle @api {
+        reverse_proxy 127.0.0.1:9000
+    }
+    handle @apiPost {
+        reverse_proxy 127.0.0.1:9000
+    }
+    handle /api-info {
+        rewrite * /
         reverse_proxy 127.0.0.1:9000
     }
     handle {
