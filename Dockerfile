@@ -28,7 +28,6 @@ RUN npm install -g serve
 # Copy compiled API and Web artifacts
 COPY --from=build --chown=node:node /prod/api /app/api
 COPY --from=build --chown=node:node /app/web/build /app/web-build
-COPY --from=build --chown=node:node /app/.git /app/api/.git
 
 # Startup script to run API backend and Web frontend simultaneously
 COPY --chown=node:node <<'EOF' /app/start.sh
