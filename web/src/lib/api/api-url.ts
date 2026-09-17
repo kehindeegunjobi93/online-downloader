@@ -10,14 +10,14 @@ export const currentApiURL = () => {
         return new URL(customInstanceURL).origin;
     }
 
+    if (typeof window !== "undefined") {
+        return window.location.origin;
+    }
+
     if (env.DEFAULT_API) {
         try {
             return new URL(env.DEFAULT_API).origin;
         } catch {}
-    }
-
-    if (typeof window !== "undefined") {
-        return window.location.origin;
     }
 
     return "http://localhost:9000";
