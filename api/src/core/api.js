@@ -24,13 +24,24 @@ import * as APIKeys from "../security/api-keys.js";
 import * as Cookies from "../processing/cookie/manager.js";
 import * as YouTubeSession from "../processing/helpers/youtube-session.js";
 
-const git = {
-    branch: await getBranch(),
-    commit: await getCommit(),
-    remote: await getRemote(),
-}
+let git = {
+    branch: "main",
+    commit: "main",
+    remote: "kehindeegunjobi93/online-downloader",
+};
 
-const version = await getVersion();
+let version = "1.0.0";
+
+try {
+    git = {
+        branch: await getBranch(),
+        commit: await getCommit(),
+        remote: await getRemote(),
+    };
+    version = await getVersion();
+} catch {
+    // Fallback if git metadata is not present in build/runtime container
+}
 
 const acceptRegex = /^application\/json(; charset=utf-8)?$/;
 
