@@ -327,7 +327,7 @@ export const runAPI = async (express, app, __dirname, isPrimary = true) => {
         return stream(res, streamInfo);
     });
 
-    app.get('/', (_, res) => {
+    app.get(['/', '/api-info'], (_, res) => {
         res.type('json');
         res.status(200).send(env.envFile ? getServerInfo() : serverInfo);
     })
