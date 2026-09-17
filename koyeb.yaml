@@ -1,0 +1,14 @@
+# Koyeb Service Deployment Configuration
+type: web
+name: cobalt-app
+instance_type: nano
+ports:
+  - port: 7575
+    path: /
+env:
+  - key: PORT
+    value: "7575"
+  - key: API_URL
+    value: "http://localhost:9000/"
+  - key: WEB_URL
+    value: "http://localhost:7575/"
