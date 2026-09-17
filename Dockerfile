@@ -13,6 +13,7 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile
 
 # Build web frontend
+ENV WEB_DEFAULT_API="http://localhost:9000/"
 RUN pnpm --filter=@imput/cobalt-web build
 
 # Deploy API production bundle
