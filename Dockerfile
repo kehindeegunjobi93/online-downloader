@@ -22,31 +22,51 @@ RUN pnpm deploy --filter=@imput/cobalt-api --prod /prod/api
 FROM base AS runner
 WORKDIR /app
 
-# Install static file server for web
-RUN npm install -g serve
+# Install Caddy for reverse-proxying API & Web on the single public PORT
+USER root
+RUN apk add --no-cache caddy
 
 # Copy compiled API and Web artifacts
-COPY --from=build --chown=node:node /prod/api /app/api
-COPY --from=build --chown=node:node /app/web/build /app/web-build
+COPY --from=build /prod/api /app/api
+COPY --from=build /app/web/build /app/web-build
 
-# Startup script to run API backend and Web frontend simultaneously
-COPY --chown=node:node <<'EOF' /app/start.sh
+# Startup script to run API backend and Web frontend behind Caddy reverse proxy
+COPY <<'EOF' /app/start.sh
 #!/bin/sh
-# Set default API_URL for Cobalt processing engine if not defined
-export API_URL="${API_URL:-http://localhost:9000/}"
+export PORT="${PORT:-10000}"
+export API_URL="${API_URL:-http://localhost:${PORT}/}"
 
-# Serve Web UI on PORT
-echo "Starting Cobalt Web UI..."
-npx serve -s /app/web-build -l ${PORT:-10000} &
+# Write Caddyfile config
+cat <<CADDY_EOF > /app/Caddyfile
+:${PORT} {
+    # Route /tunnel and POST / directly to API backend on 9000
+    @api {
+        path /tunnel* /session*
+        method POST
+    }
+    handle @api {
+        reverse_proxy 127.0.0.1:9000
+    }
+    handle {
+        # Serve static Web UI
+        file_server {
+            root /app/web-build
+        }
+        try_files {path} /index.html
+    }
+}
+CADDY_EOF
 
 # Start API Backend on 9000
-echo "Starting Cobalt API Backend..."
-cd /app/api && exec node src/cobalt
+echo "Starting Cobalt API Backend on port 9000..."
+cd /app/api && node src/cobalt &
+
+# Start Caddy Reverse Proxy on PORT
+echo "Starting Reverse Proxy on port ${PORT}..."
+exec caddy run --config /app/Caddyfile --adapter caddyfile
 EOF
 
 RUN chmod +x /app/start.sh
 
-USER node
-
-EXPOSE 7575 9000
+EXPOSE 10000 9000
 CMD ["/app/start.sh"]
