@@ -260,26 +260,36 @@ export default async function (o) {
     }
 
     let info;
-    try {
-        info = await yt.getBasicInfo(o.id, { client: innertubeClient });
-    } catch (e) {
-        if (e?.info) {
-            let errorInfo;
-            try { errorInfo = JSON.parse(e?.info); } catch {}
+    const clientCandidates = [innertubeClient, "ANDROID", "WEB", "TV"].filter((c, i, a) => a.indexOf(c) === i);
 
-            if (errorInfo?.reason === "This video is private") {
-                return { error: "content.video.private" };
+    for (const clientName of clientCandidates) {
+        try {
+            info = await yt.getBasicInfo(o.id, { client: clientName });
+            if (info) {
+                innertubeClient = clientName;
+                break;
             }
-            if (["INVALID_ARGUMENT", "UNAUTHENTICATED"].includes(errorInfo?.error?.status)) {
-                return { error: "youtube.api_error" };
+        } catch (e) {
+            if (clientName === clientCandidates[clientCandidates.length - 1]) {
+                if (e?.info) {
+                    let errorInfo;
+                    try { errorInfo = JSON.parse(e?.info); } catch {}
+
+                    if (errorInfo?.reason === "This video is private") {
+                        return { error: "content.video.private" };
+                    }
+                    if (["INVALID_ARGUMENT", "UNAUTHENTICATED"].includes(errorInfo?.error?.status)) {
+                        return { error: "youtube.api_error" };
+                    }
+                }
+
+                if (e?.message === "This video is unavailable") {
+                    return { error: "content.video.unavailable" };
+                }
+
+                return { error: "fetch.fail" };
             }
         }
-
-        if (e?.message === "This video is unavailable") {
-            return { error: "content.video.unavailable" };
-        }
-
-        return { error: "fetch.fail" };
     }
 
     if (!info) return { error: "fetch.fail" };
