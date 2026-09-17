@@ -96,7 +96,7 @@ const request = async (requestBody: CobaltSaveRequestBody, justRetried = false) 
     const response: Optional<CobaltAPIResponse> = await fetch(api, {
         method: "POST",
         redirect: "manual",
-        signal: AbortSignal.timeout(20000),
+        signal: AbortSignal.timeout(60000),
         body: JSON.stringify(requestBody),
         headers: {
             "Accept": "application/json",
@@ -106,7 +106,7 @@ const request = async (requestBody: CobaltSaveRequestBody, justRetried = false) 
     })
     .then(r => r.json())
     .catch((e) => {
-        if (e?.message?.includes("timed out")) {
+        if (e?.message?.includes("timed out") || e?.name === "TimeoutError") {
             return {
                 status: "error",
                 error: {

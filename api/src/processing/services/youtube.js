@@ -264,7 +264,9 @@ export default async function (o) {
 
     for (const clientName of clientCandidates) {
         try {
-            info = await yt.getBasicInfo(o.id, { client: clientName });
+            const fetchPromise = yt.getBasicInfo(o.id, { client: clientName });
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("client_timeout")), 6000));
+            info = await Promise.race([fetchPromise, timeoutPromise]);
             if (info) {
                 innertubeClient = clientName;
                 break;
