@@ -1,6 +1,6 @@
 # Koyeb Service Deployment Configuration
 type: web
-name: cobalt-app
+name: online-downloader
 instance_type: nano
 ports:
   - port: 7575
