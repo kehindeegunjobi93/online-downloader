@@ -1,0 +1,15 @@
+# Render Infrastructure Blueprint
+services:
+  - type: web
+    name: online-downloader
+    env: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: API_URL
+        value: http://localhost:9000/
+      - key: WEB_URL
+        value: http://localhost:10000/
